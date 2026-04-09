@@ -1,0 +1,82 @@
+name: Native Build & Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-native:
+    name: Build native image (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            artifact_name: myspringai
+            asset_name: myspringai-linux-amd64
+          - os: macos-latest
+            artifact_name: myspringai
+            asset_name: myspringai-macos-amd64
+          - os: windows-latest
+            artifact_name: myspringai.exe
+            asset_name: myspringai-windows-amd64.exe
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up GraalVM JDK 17
+        uses: graalvm/setup-graalvm@v1
+        with:
+          java-version: '17'
+          distribution: 'graalvm'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Cache Maven packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Build native image
+        run: mvn -Pnative package -DskipTests --no-transfer-progress
+
+      - name: Upload native binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.asset_name }}
+          path: target/${{ matrix.artifact_name }}
+          retention-days: 5
+
+  release:
+    name: Create GitHub Release
+    needs: build-native
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Download all native binaries
+        uses: actions/download-artifact@v4
+        with:
+          path: dist/
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          files: |
+            dist/myspringai-linux-amd64/myspringai
+            dist/myspringai-macos-amd64/myspringai
+            dist/myspringai-windows-amd64.exe/myspringai.exe
