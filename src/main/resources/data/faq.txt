@@ -1,0 +1,26 @@
+Frequently Asked Questions (FAQ)
+=================================
+
+Q: What is your return policy?
+A: We offer a 30-day no-questions-asked return policy. Items must be unused and in original packaging. Contact support@example.com to initiate a return.
+
+Q: How long does shipping take?
+A: Standard shipping takes 3-5 business days. Express shipping (1-2 days) is available for an additional fee of ¥25.
+
+Q: Do you ship internationally?
+A: Currently we ship to mainland China, Hong Kong, and Taiwan. International shipping for other regions is coming soon.
+
+Q: How can I track my order?
+A: After placing an order, you will receive a tracking number by email within 24 hours. You can track your package on the carrier's website.
+
+Q: What payment methods are accepted?
+A: We accept WeChat Pay, Alipay, UnionPay, and major credit cards (Visa, MasterCard).
+
+Q: How do I contact customer support?
+A: Email: support@example.com | Phone: 400-888-0000 (Mon-Fri 9:00-18:00) | WeChat: ExampleSupport
+
+Q: Is there a warranty on products?
+A: All electronics come with a 1-year manufacturer warranty. Furniture items have a 6-month warranty. Warranty does not cover physical damage.
+
+Q: Can I change or cancel my order?
+A: Orders can be modified or cancelled within 2 hours of placement. After that, the order is processed and cannot be changed.
