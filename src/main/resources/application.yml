@@ -5,9 +5,19 @@ spring:
       #   export OPENAI_API_KEY=sk-...
       # Or replace the placeholder below for local testing only (do NOT commit real keys).
       api-key: ${OPENAI_API_KEY:YOUR_API_KEY_HERE}
+      # Base URL for the OpenAI-compatible API endpoint.
+      # Set to a third-party base URL to use any OpenAI-compatible model provider, e.g.:
+      #   export OPENAI_BASE_URL=https://api.deepseek.com
+      #   export OPENAI_BASE_URL=http://localhost:11434/v1    # Ollama
+      #   export OPENAI_BASE_URL=https://api.siliconflow.cn/v1
+      base-url: ${OPENAI_BASE_URL:https://api.openai.com}
       chat:
         options:
-          model: gpt-4o-mini      # Change to gpt-4o, gpt-3.5-turbo, etc. as needed
+          # Model name supported by the chosen provider, e.g.:
+          #   export OPENAI_MODEL=deepseek-chat
+          #   export OPENAI_MODEL=qwen-plus
+          #   export OPENAI_MODEL=llama3
+          model: ${OPENAI_MODEL:gpt-4o-mini}
           temperature: 0.7
 
 # Directory where local data files are stored.

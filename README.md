@@ -18,21 +18,27 @@
 |------|------|
 | JDK  | 17+  |
 | Maven | 3.8+ |
-| OpenAI API Key | [获取](https://platform.openai.com/api-keys) |
+| API Key | OpenAI 或任意兼容模型的 Key |
 
-### 2. 配置 API Key
+### 2. 配置 API Key 和模型
 
 ```bash
-export OPENAI_API_KEY=sk-...
+export OPENAI_API_KEY=sk-...                        # 必填
+export OPENAI_BASE_URL=https://api.openai.com       # 可选，默认 OpenAI；替换为第三方地址可接入兼容模型
+export OPENAI_MODEL=gpt-4o-mini                     # 可选，默认 gpt-4o-mini
 ```
 
-或者直接修改 `src/main/resources/application.yml`（**不要将真实 Key 提交到代码仓库**）：
+或者在 `src/main/resources/application.yml`（**不要将真实 Key 提交到代码仓库**）：
 
 ```yaml
 spring:
   ai:
     openai:
       api-key: sk-...
+      base-url: https://api.deepseek.com   # 第三方 Base URL
+      chat:
+        options:
+          model: deepseek-chat
 ```
 
 ### 3. 运行
@@ -168,23 +174,107 @@ Registered 10 tool callback(s) from 4 ToolProvider bean(s)
 spring:
   ai:
     openai:
-      api-key: ${OPENAI_API_KEY:YOUR_KEY}   # 推荐通过环境变量设置
+      api-key: ${OPENAI_API_KEY:YOUR_KEY}        # 推荐通过环境变量设置
+      base-url: ${OPENAI_BASE_URL:https://api.openai.com}  # 第三方兼容模型的 Base URL
       chat:
         options:
-          model: gpt-4o-mini                 # 可换成 gpt-4o, gpt-3.5-turbo 等
+          model: ${OPENAI_MODEL:gpt-4o-mini}     # 模型名称
           temperature: 0.7
 
 app:
   data:
-    directory: ${DATA_DIR:./data}            # 本地文件工具的根目录
+    directory: ${DATA_DIR:./data}                # 本地文件工具的根目录
 ```
 
 **环境变量：**
 
 ```bash
-export OPENAI_API_KEY=sk-...          # 必填：OpenAI API Key
+export OPENAI_API_KEY=sk-...          # 必填：API Key
+export OPENAI_BASE_URL=https://...    # 可选：第三方 Base URL（默认 https://api.openai.com）
+export OPENAI_MODEL=gpt-4o-mini       # 可选：模型名称
 export DATA_DIR=/path/to/your/data    # 可选：自定义数据目录
 ```
+
+---
+
+## 接入第三方 OpenAI 兼容模型
+
+只需设置 `OPENAI_BASE_URL` 和 `OPENAI_MODEL` 环境变量，无需修改任何代码，即可接入任何 OpenAI 兼容的大模型。
+
+### DeepSeek
+
+```bash
+export OPENAI_API_KEY=sk-...                      # DeepSeek API Key
+export OPENAI_BASE_URL=https://api.deepseek.com
+export OPENAI_MODEL=deepseek-chat
+```
+
+### 硅基流动 (SiliconFlow)
+
+```bash
+export OPENAI_API_KEY=sk-...                           # SiliconFlow API Key
+export OPENAI_BASE_URL=https://api.siliconflow.cn/v1
+export OPENAI_MODEL=Qwen/Qwen2.5-72B-Instruct
+```
+
+### 阿里云百炼 / 通义千问
+
+```bash
+export OPENAI_API_KEY=sk-...                                    # 阿里云 API Key
+export OPENAI_BASE_URL=https://dashscope.aliyuncs.com/compatible-mode/v1
+export OPENAI_MODEL=qwen-plus
+```
+
+### Ollama（本地部署）
+
+```bash
+export OPENAI_API_KEY=ollama                  # 任意非空字符串即可
+export OPENAI_BASE_URL=http://localhost:11434/v1
+export OPENAI_MODEL=llama3
+```
+
+---
+
+## 使用外部配置文件
+
+打包成 JAR 后，可以将 `application.yml` 放到 JAR 外部，方便在不同环境中单独维护配置，无需重新打包。
+
+Spring Boot 按以下顺序自动加载配置（优先级从高到低）：
+
+1. JAR 同目录的 `config/application.yml`
+2. JAR 同目录的 `application.yml`
+3. JAR 内部的 `application.yml`（默认）
+
+### 方式一：`config/` 子目录（推荐）
+
+```bash
+myapp/
+├── myspringai-*.jar
+└── config/
+    └── application.yml     ← 此处的配置自动覆盖 JAR 内部配置
+```
+
+```bash
+cd myapp
+java -jar myspringai-*.jar
+```
+
+### 方式二：指定任意外部路径
+
+```bash
+java -jar myspringai-*.jar \
+  --spring.config.additional-location=file:/etc/myspringai/application.yml
+```
+
+或通过环境变量：
+
+```bash
+export SPRING_CONFIG_ADDITIONAL_LOCATION=file:/etc/myspringai/application.yml
+java -jar myspringai-*.jar
+```
+
+> **提示：** 使用 `additional-location` 时，外部配置与 JAR 内部配置**合并**（外部优先）；  
+> 使用 `--spring.config.location` 则**完全替换**内部配置。
 
 ---
 
