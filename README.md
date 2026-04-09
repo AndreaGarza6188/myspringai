@@ -249,20 +249,20 @@ Spring Boot 按以下顺序自动加载配置（优先级从高到低）：
 
 ```bash
 myapp/
-├── myspringai-0.0.1.jar
+├── myspringai-*.jar
 └── config/
     └── application.yml     ← 此处的配置自动覆盖 JAR 内部配置
 ```
 
 ```bash
 cd myapp
-java -jar myspringai-0.0.1.jar
+java -jar myspringai-*.jar
 ```
 
 ### 方式二：指定任意外部路径
 
 ```bash
-java -jar myspringai-0.0.1.jar \
+java -jar myspringai-*.jar \
   --spring.config.additional-location=file:/etc/myspringai/application.yml
 ```
 
@@ -270,7 +270,7 @@ java -jar myspringai-0.0.1.jar \
 
 ```bash
 export SPRING_CONFIG_ADDITIONAL_LOCATION=file:/etc/myspringai/application.yml
-java -jar myspringai-0.0.1.jar
+java -jar myspringai-*.jar
 ```
 
 > **提示：** 使用 `additional-location` 时，外部配置与 JAR 内部配置**合并**（外部优先）；  
