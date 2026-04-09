@@ -1,0 +1,44 @@
+Product Catalog
+===============
+
+ID: P001
+Name: Wireless Bluetooth Headphones
+Category: Electronics
+Price: ¥299.00
+Description: High-quality noise-cancelling wireless headphones with 30-hour battery life.
+Stock: 150 units
+
+ID: P002
+Name: Ergonomic Office Chair
+Category: Furniture
+Price: ¥899.00
+Description: Adjustable lumbar support, breathable mesh back, armrests included.
+Stock: 45 units
+
+ID: P003
+Name: Mechanical Keyboard
+Category: Electronics
+Price: ¥459.00
+Description: RGB backlit, Cherry MX Blue switches, compact 75% layout.
+Stock: 80 units
+
+ID: P004
+Name: Portable Power Bank 20000mAh
+Category: Electronics
+Price: ¥199.00
+Description: Dual USB-A + USB-C output, supports 65W fast charging, LED indicator.
+Stock: 200 units
+
+ID: P005
+Name: Standing Desk Converter
+Category: Furniture
+Price: ¥599.00
+Description: Adjustable height 15-50 cm, supports dual monitors up to 27 inches.
+Stock: 30 units
+
+ID: P006
+Name: Smart Water Bottle
+Category: Lifestyle
+Price: ¥149.00
+Description: Temperature display, 500ml capacity, stainless steel, keeps cold 24h / hot 12h.
+Stock: 120 units

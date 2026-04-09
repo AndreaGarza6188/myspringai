@@ -1,0 +1,29 @@
+target/
+*.class
+*.jar
+*.war
+*.ear
+
+# IDE files
+.idea/
+*.iml
+.eclipse/
+.settings/
+.project
+.classpath
+
+# Maven wrapper
+.mvn/wrapper/maven-wrapper.jar
+
+# Runtime data directory (created at startup from classpath samples)
+/data/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Env files with secrets — never commit these
+.env
+*.env
+application-local.yml
+application-local.yaml

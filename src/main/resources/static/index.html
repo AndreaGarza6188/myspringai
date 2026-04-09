@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Spring AI Agent</title>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f0f2f5;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        header {
+            width: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            padding: 14px 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,.2);
+        }
+        header .logo { font-size: 1.5rem; }
+        header h1 { font-size: 1.2rem; font-weight: 600; }
+        header .subtitle { font-size: 0.78rem; opacity: .85; margin-left: auto; }
+
+        #chat-container {
+            width: 100%;
+            max-width: 860px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 16px;
+            gap: 8px;
+            overflow: hidden;
+        }
+
+        #messages {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding: 8px 4px;
+            scroll-behavior: smooth;
+        }
+
+        .message {
+            display: flex;
+            gap: 10px;
+            max-width: 85%;
+            animation: fadeIn .2s ease;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; } }
+
+        .message.user  { align-self: flex-end; flex-direction: row-reverse; }
+        .message.bot   { align-self: flex-start; }
+
+        .avatar {
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+        .message.user .avatar { background: #667eea; color: #fff; }
+        .message.bot  .avatar { background: #e8e8e8; color: #555; }
+
+        .bubble {
+            padding: 10px 14px;
+            border-radius: 18px;
+            line-height: 1.55;
+            font-size: 0.92rem;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        .message.user .bubble {
+            background: #667eea;
+            color: #fff;
+            border-bottom-right-radius: 4px;
+        }
+        .message.bot .bubble {
+            background: #fff;
+            color: #222;
+            border-bottom-left-radius: 4px;
+            box-shadow: 0 1px 4px rgba(0,0,0,.1);
+        }
+
+        .message.bot.error .bubble { background: #fff0f0; color: #c0392b; }
+
+        /* Typing indicator */
+        .typing-indicator { display: flex; gap: 5px; padding: 12px 16px; }
+        .typing-indicator span {
+            width: 8px; height: 8px;
+            background: #aaa;
+            border-radius: 50%;
+            animation: bounce 1.2s infinite;
+        }
+        .typing-indicator span:nth-child(2) { animation-delay: .2s; }
+        .typing-indicator span:nth-child(3) { animation-delay: .4s; }
+        @keyframes bounce {
+            0%, 60%, 100% { transform: translateY(0); }
+            30%           { transform: translateY(-8px); }
+        }
+
+        /* Tool usage badge */
+        .tool-badge {
+            display: inline-block;
+            background: #e8f4fd;
+            color: #1a73e8;
+            border: 1px solid #c5dff7;
+            border-radius: 12px;
+            padding: 2px 10px;
+            font-size: 0.74rem;
+            margin-bottom: 6px;
+        }
+
+        /* Input area */
+        #input-area {
+            display: flex;
+            gap: 10px;
+            background: #fff;
+            padding: 12px;
+            border-radius: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,.1);
+        }
+
+        #user-input {
+            flex: 1;
+            border: none;
+            outline: none;
+            font-size: 0.95rem;
+            resize: none;
+            max-height: 120px;
+            line-height: 1.5;
+            font-family: inherit;
+        }
+
+        #send-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            width: 44px; height: 44px;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem;
+            transition: opacity .2s;
+            flex-shrink: 0;
+        }
+        #send-btn:disabled { opacity: .5; cursor: not-allowed; }
+        #send-btn:not(:disabled):hover { opacity: .85; }
+
+        #session-info {
+            font-size: 0.72rem;
+            color: #999;
+            text-align: center;
+            padding: 2px 0;
+        }
+
+        /* Suggestions */
+        .suggestions {
+            display: flex; flex-wrap: wrap; gap: 8px; padding: 4px 0;
+        }
+        .suggestion-btn {
+            background: #fff;
+            border: 1px solid #d0d0d0;
+            border-radius: 20px;
+            padding: 6px 14px;
+            font-size: 0.82rem;
+            cursor: pointer;
+            color: #444;
+            transition: background .15s, border-color .15s;
+        }
+        .suggestion-btn:hover { background: #f0f0ff; border-color: #667eea; color: #667eea; }
+
+        @media (max-width: 600px) {
+            header h1 { font-size: 1rem; }
+            header .subtitle { display: none; }
+            .message { max-width: 95%; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <span class="logo">🤖</span>
+    <h1>Spring AI Agent</h1>
+    <span class="subtitle">Web Search · Local Files · Custom Tools</span>
+</header>
+
+<div id="chat-container">
+    <div id="messages"></div>
+
+    <div class="suggestions" id="suggestions">
+        <button class="suggestion-btn" onclick="sendSuggestion(this)">列出本地文件</button>
+        <button class="suggestion-btn" onclick="sendSuggestion(this)">现在几点了？</button>
+        <button class="suggestion-btn" onclick="sendSuggestion(this)">查询产品目录</button>
+        <button class="suggestion-btn" onclick="sendSuggestion(this)">搜索退换货政策</button>
+        <button class="suggestion-btn" onclick="sendSuggestion(this)">Search web: Spring AI</button>
+        <button class="suggestion-btn" onclick="sendSuggestion(this)">Calculate: 1234 × 56</button>
+    </div>
+
+    <div id="input-area">
+        <textarea id="user-input" rows="1"
+                  placeholder="Ask me anything — I can search the web, read local files, and more…"
+                  onkeydown="handleKey(event)"
+                  oninput="autoResize(this)"></textarea>
+        <button id="send-btn" onclick="sendMessage()" title="Send (Enter)">➤</button>
+    </div>
+    <div id="session-info"></div>
+</div>
+
+<script>
+    let sessionId = null;
+
+    // --- Session management ---
+    async function initSession() {
+        try {
+            const res = await fetch('/api/session', { method: 'POST' });
+            const data = await res.json();
+            sessionId = data.sessionId;
+            document.getElementById('session-info').textContent = 'Session: ' + sessionId.substring(0, 8) + '…';
+        } catch (e) {
+            console.error('Failed to create session', e);
+        }
+        appendBotMessage("👋 Hi! I'm your Spring AI Agent. I can:\n• 🌐 Search the web\n• 📂 Read local files\n• 🧮 Do calculations\n• ⏰ Tell you the date/time\n\nHow can I help you?");
+    }
+
+    // --- Send message ---
+    async function sendMessage() {
+        const input = document.getElementById('user-input');
+        const text = input.value.trim();
+        if (!text) return;
+
+        input.value = '';
+        autoResize(input);
+        document.getElementById('suggestions').style.display = 'none';
+        document.getElementById('send-btn').disabled = true;
+
+        appendUserMessage(text);
+        const typingId = appendTypingIndicator();
+
+        try {
+            const res = await fetch('/api/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ sessionId, message: text })
+            });
+            const data = await res.json();
+            removeMessage(typingId);
+
+            if (!res.ok) {
+                appendBotMessage('❌ Error: ' + (data.error || 'Unknown error'), true);
+            } else {
+                if (!sessionId) sessionId = data.sessionId;
+                appendBotMessage(data.response);
+            }
+        } catch (e) {
+            removeMessage(typingId);
+            appendBotMessage('❌ Network error: ' + e.message, true);
+        } finally {
+            document.getElementById('send-btn').disabled = false;
+            input.focus();
+        }
+    }
+
+    function sendSuggestion(btn) {
+        document.getElementById('user-input').value = btn.textContent;
+        sendMessage();
+    }
+
+    // --- DOM helpers ---
+    function appendUserMessage(text) {
+        const div = createMessage('user');
+        div.querySelector('.bubble').textContent = text;
+        appendMessage(div);
+    }
+
+    function appendBotMessage(text, isError = false) {
+        const div = createMessage('bot' + (isError ? ' error' : ''));
+        div.querySelector('.bubble').textContent = text;
+        appendMessage(div);
+        return div.id;
+    }
+
+    function appendTypingIndicator() {
+        const id = 'msg-' + Date.now();
+        const html = `<div class="message bot" id="${id}">
+            <div class="avatar">🤖</div>
+            <div class="bubble">
+                <div class="typing-indicator"><span></span><span></span><span></span></div>
+            </div>
+        </div>`;
+        const container = document.getElementById('messages');
+        container.insertAdjacentHTML('beforeend', html);
+        container.lastElementChild.scrollIntoView({ behavior: 'smooth' });
+        return id;
+    }
+
+    function removeMessage(id) {
+        const el = document.getElementById(id);
+        if (el) el.remove();
+    }
+
+    function createMessage(classes) {
+        const id = 'msg-' + Date.now() + Math.random().toString(36).slice(2);
+        const isUser = classes.includes('user');
+        const div = document.createElement('div');
+        div.className = 'message ' + classes;
+        div.id = id;
+        div.innerHTML = `
+            <div class="avatar">${isUser ? '👤' : '🤖'}</div>
+            <div class="bubble"></div>`;
+        return div;
+    }
+
+    function appendMessage(el) {
+        const container = document.getElementById('messages');
+        container.appendChild(el);
+        el.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // --- Input helpers ---
+    function handleKey(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage();
+        }
+    }
+
+    function autoResize(el) {
+        el.style.height = 'auto';
+        el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+    }
+
+    // --- Init ---
+    initSession();
+</script>
+</body>
+</html>
