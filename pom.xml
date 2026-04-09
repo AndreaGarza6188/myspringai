@@ -13,7 +13,7 @@
 
     <groupId>com.example</groupId>
     <artifactId>myspringai</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.1</version>
     <name>myspringai</name>
     <description>Spring AI Agent Example - 智能代理示例工程</description>
 
